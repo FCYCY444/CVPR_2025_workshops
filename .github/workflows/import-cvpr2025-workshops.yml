@@ -1,0 +1,89 @@
+name: Import licensed CVPR 2025 Workshops source snapshots
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/import-cvpr2025-workshops.yml
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: cvpr-2025-workshops-snapshot-import
+  cancel-in-progress: false
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Check out aggregate repo
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+          fetch-depth: 1
+      - name: Copy permitted upstream repository snapshots without running code
+        shell: bash
+        env:
+          GIT_LFS_SKIP_SMUDGE: "1"
+          GIT_TERMINAL_PROMPT: "0"
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          mkdir -p import-reports
+          report="import-reports/cvpr2025-workshops-import.md"
+          printf '# CVPR 2025 Workshops source import report\n\n' > "$report"
+          printf 'Each entry is a shallow snapshot of the upstream default branch. No upstream source code was executed.\n\n' >> "$report"
+          imported=0
+          failures=0
+          batch=0
+          batchno=0
+          while IFS='|' read -r folder url license; do
+            [ -n "$folder" ] || continue
+            echo "::group::Import $folder"
+            tmp="$(mktemp -d)"
+            if git -c core.hooksPath=/dev/null clone --depth 1 --single-branch --filter=blob:none --quiet "$url" "$tmp/upstream"; then
+              if [ -f "$tmp/upstream/LICENSE" ] || [ -f "$tmp/upstream/LICENCE.md" ] || [ -f "$tmp/upstream/LICENSE.md" ] || [ -f "$tmp/upstream/LICENSE.txt" ]; then
+                upstream_sha="$(git -C "$tmp/upstream" rev-parse HEAD)"
+                rm -rf "$tmp/upstream/.git"
+                find "$tmp/upstream" -type f -size +95M -print | while IFS= read -r f; do
+                  printf -- '- Oversized file omitted (>95 MiB): %s/%s\n' "$folder" "${f#"$tmp/upstream/"}" >> "$report"
+                  rm -f "$f"
+                done
+                mkdir -p "$folder"
+                cp -a "$tmp/upstream/." "$folder/"
+                git add -- "$folder"
+                printf -- '- Imported: **%s** from %s; upstream commit `%s`; license: %s\n' "$folder" "$url" "$upstream_sha" "$license" >> "$report"
+                imported=$((imported + 1))
+              else
+                printf -- '- License file missing; link only: **%s**, %s\n' "$folder" "$url" >> "$report"
+                failures=$((failures + 1))
+              fi
+            else
+              printf -- '- Clone failed: **%s**, %s\n' "$folder" "$url" >> "$report"
+              failures=$((failures + 1))
+            fi
+            rm -rf "$tmp"
+            echo "::endgroup::"
+            batch=$((batch + 1))
+            if [ "$batch" -ge 3 ]; then
+              batchno=$((batchno + 1))
+              git add -- "$report"
+              if ! git diff --cached --quiet; then
+                git commit -m "Import CVPR 2025 workshop source batch $batchno"
+                git push origin HEAD:main
+              fi
+              batch=0
+            fi
+          done < .github/import-cvpr2025-workshops.tsv
+          printf '\nNot mirrored due to missing verified redistribution permissions: NTIRE2025_CDFSOD, imagine, MAI-2025-Workshop, SODDCNet, SK-RD4AD, ShowOrTell, ITACLIP. Their directories contain only SOURCE.md.\n' >> "$report"
+          printf '\nNon-commercial license restrictions: semanticsugarbeets (CC BY-NC-SA 4.0); vit4v (CC BY-NC-ND 4.0, no shared adaptations).\n' >> "$report"
+          printf '\nGit LFS content, git submodules, external model weights, and oversized files might not be included in the copies.\n' >> "$report"
+          git add -- "$report"
+          if ! git diff --cached --quiet; then
+            git commit -m "Finalize CVPR 2025 Workshops source import report"
+            git push origin HEAD:main
+          fi
+          echo "Imported $imported repositories; failures=$failures"
+          if [ "$failures" -gt 0 ]; then
+            exit 1
+          fi
