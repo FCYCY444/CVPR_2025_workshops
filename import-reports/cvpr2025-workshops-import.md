@@ -8,3 +8,7 @@ Each entry is a shallow snapshot of the upstream default branch. No upstream sou
 - Imported: **FLAR-SVD** from https://github.com/MoritzTho/FLAR-SVD.git; upstream commit `4b567305daf5d18f5dac8a310921250f089d8f30`; license: CC0-1.0
 - Imported: **CARN** from https://github.com/rrgaire/CARN.git; upstream commit `c7db33a9ef8f19570c0c560fe3c3e9b9a77f413e`; license: MIT
 - Imported: **vit4v** from https://github.com/kernel-machine/vit4v.git; upstream commit `63dc394c26ca901d89efcc9264344d237facff96`; license: CC BY-NC-ND 4.0（仅非商业；不得分发改编版本）
+
+## Recovery of five remaining projects
+
+- Imported (recovery): **banana-defect-segmentation** from https://github.com/manuelknott/banana-defect-segmentation.git; upstream commit `0ab1f26c4cd7d356da78cdd868078d30ec4d51d6`; license: MIT
