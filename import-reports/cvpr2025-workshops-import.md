@@ -15,3 +15,4 @@ Each entry is a shallow snapshot of the upstream default branch. No upstream sou
 - Imported (recovery): **AL-CycleGAN** from https://github.com/ganatma/AL-CycleGAN.git; upstream commit `32c3f523ceb19a6084ee1ed68ad43ae5ca9365d0`; license: MIT
 - Imported (recovery): **moviad** from https://github.com/AMCO-UniPD/moviad.git; upstream commit `02db44f17de0a1c0c68c62e8e914b98227f9e6ed`; license: Apache-2.0
 - Imported (recovery): **NExNet_Seg** from https://github.com/MAIN-Lab/NExNet_Seg.git; upstream commit `ec45d7871ebbb1b065485aa24d68ef42f10e607a`; license: MIT
+- Imported (recovery): **viad-benchmark** from https://github.com/abc-125/viad-benchmark.git; upstream commit `d527c76da55add141f1e8be620fb80410fa025e6`; license: Apache-2.0
