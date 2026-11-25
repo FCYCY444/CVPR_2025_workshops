@@ -1,0 +1,87 @@
+name: Recover remaining CVPR 2025 Workshops source imports
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/recover-cvpr2025-workshops-import.yml
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: cvpr-2025-workshops-recovery
+  cancel-in-progress: false
+jobs:
+  recover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Check out collection
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+          fetch-depth: 1
+      - name: Import each outstanding project as an independent commit
+        shell: bash
+        env:
+          GIT_LFS_SKIP_SMUDGE: "1"
+          GIT_TERMINAL_PROMPT: "0"
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          report="import-reports/cvpr2025-workshops-import.md"
+          mkdir -p import-reports
+          printf '\n## Recovery of five remaining projects\n\n' >> "$report"
+          copied=0
+          while IFS='|' read -r folder url license; do
+            [ -n "$folder" ] || continue
+            case "$folder" in
+              banana-defect-segmentation|AL-CycleGAN|moviad|NExNet_Seg|viad-benchmark) ;;
+              *) continue ;;
+            esac
+            echo "::group::Recover $folder"
+            if [ -f "$folder/LICENSE" ]; then
+              echo "$folder already imported, skipping"
+              continue
+            fi
+            tmp="$(mktemp -d)"
+            if git -c core.hooksPath=/dev/null clone --quiet --depth 1 --single-branch --filter=blob:none "$url" "$tmp/source"; then
+              if [ ! -f "$tmp/source/LICENSE" ]; then
+                echo "Expected upstream LICENSE not found for $folder"
+                exit 1
+              fi
+              sha="$(git -C "$tmp/source" rev-parse HEAD)"
+              rm -rf "$tmp/source/.git"
+              mkdir -p "$folder"
+              find "$tmp/source" -type f -size +20M -print | while IFS= read -r f; do
+                printf -- '- Omitted large nonessential file (>20 MiB): %s/%s\n' "$folder" "${f#"$tmp/source/"}" >> "$report"
+                rm -f "$f"
+              done
+              cp -a "$tmp/source/." "$folder/"
+              printf -- '- Imported (recovery): **%s** from %s; upstream commit `%s`; license: %s\n' "$folder" "$url" "$sha" "$license" >> "$report"
+              git add -- "$folder" "$report"
+              if ! git diff --cached --quiet; then
+                git commit -m "Recover licensed workshop snapshot $folder"
+                pushed=0
+                for attempt in 1 2 3 4; do
+                  if git push origin HEAD:main; then
+                    pushed=1
+                    break
+                  fi
+                  echo "GitHub push failed for $folder attempt $attempt, retrying"
+                  sleep "$((attempt * 12))"
+                done
+                if [ "$pushed" -ne 1 ]; then
+                  echo "Failed to push $folder after retries"
+                  exit 1
+                fi
+              fi
+              copied=$((copied + 1))
+            else
+              echo "Clone failed for $folder"
+              exit 1
+            fi
+            rm -rf "$tmp"
+            echo "::endgroup::"
+          done < .github/import-cvpr2025-workshops.tsv
+          echo "Successful recovery imports: $copied"
