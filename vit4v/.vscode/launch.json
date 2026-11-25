@@ -1,0 +1,62 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debugger Python: File corrente",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": [
+                "--dataset","/home/nonroot/ssd/timesformer_segment"
+            ]
+        },
+        {
+            "name": "Dataset split",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": [
+                "--segment_path", "/dataset/segments32_all",
+                "--output_path","test",
+            ]
+        },
+        {
+            "name": "MoViNet",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": [
+                "--dataset", "/dataset/segment32_vs30",
+                "--model","movinet",
+                "--batch_size","2"
+            ]
+        },
+        {
+            "name": "segment_to_raw",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": [
+                "--dataset", "/dataset/segment32_vs30/val",
+                "--output_videos","/dataset/raw/dataset_v2_raw_s32_val",
+                "--raw_videos","/dataset/raw/dataset_v2_raw"
+            ]
+        },
+        {
+            "name": "Test video",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": [
+                "--window_size", "32",
+                "--model","runs/vivit_6/model.pth",
+                "--video","/dataset/raw/dataset_v2_raw_s32_val"
+            ]
+        }
+    ]
+}
