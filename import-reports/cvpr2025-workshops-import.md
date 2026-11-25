@@ -16,3 +16,11 @@ Each entry is a shallow snapshot of the upstream default branch. No upstream sou
 - Imported (recovery): **moviad** from https://github.com/AMCO-UniPD/moviad.git; upstream commit `02db44f17de0a1c0c68c62e8e914b98227f9e6ed`; license: Apache-2.0
 - Imported (recovery): **NExNet_Seg** from https://github.com/MAIN-Lab/NExNet_Seg.git; upstream commit `ec45d7871ebbb1b065485aa24d68ef42f10e607a`; license: MIT
 - Imported (recovery): **viad-benchmark** from https://github.com/abc-125/viad-benchmark.git; upstream commit `d527c76da55add141f1e8be620fb80410fa025e6`; license: Apache-2.0
+
+## Final verified result
+
+- Unique upstream references: 18 (five repeated links removed across two uploaded lists).
+- Licensed source snapshots imported: 11 (six in the first successful pushes, five in recovery).
+- Link-only projects because redistribution rights are unverified: 7.
+- First workflow stopped at a GitHub remote Internal Server Error during a large batch push. A separate per-project recovery workflow completed successfully: https://github.com/FCYCY444/CVPR_2025_workshops/actions/runs/45518690532
+- A source snapshot means the upstream public GitHub files at the recorded commit; large external datasets, pretrained model weights, Git LFS objects and git submodules may not be included.
