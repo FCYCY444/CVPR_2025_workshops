@@ -13,3 +13,4 @@ Each entry is a shallow snapshot of the upstream default branch. No upstream sou
 
 - Imported (recovery): **banana-defect-segmentation** from https://github.com/manuelknott/banana-defect-segmentation.git; upstream commit `0ab1f26c4cd7d356da78cdd868078d30ec4d51d6`; license: MIT
 - Imported (recovery): **AL-CycleGAN** from https://github.com/ganatma/AL-CycleGAN.git; upstream commit `32c3f523ceb19a6084ee1ed68ad43ae5ca9365d0`; license: MIT
+- Imported (recovery): **moviad** from https://github.com/AMCO-UniPD/moviad.git; upstream commit `02db44f17de0a1c0c68c62e8e914b98227f9e6ed`; license: Apache-2.0
